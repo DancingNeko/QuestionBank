@@ -54,6 +54,13 @@ public class Question implements Comparable,Serializable{
 		}
 	}
 	
+	public Object getQuestion() {
+		return content;
+	}
+	public Object getAnswer() {
+		return answer;
+	}
+	
 	public String toString() {
 		return "Question: " + content + "\tAnswer:" + answer + "\n";
 	}

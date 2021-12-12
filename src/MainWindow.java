@@ -20,7 +20,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.filechooser.FileNameExtensionFilter;
+
 
 public class MainWindow extends JFrame{
 	JFileChooser jfc;
@@ -50,6 +50,11 @@ public class MainWindow extends JFrame{
 			review.setMaximumSize(new Dimension(200,30));
 			review.setAlignmentX(Component.CENTER_ALIGNMENT);
 			this.add(review);
+			JPanel stats = new StatsPanel(user.getQuestions().getQuestions());
+			stats.setAlignmentX(CENTER_ALIGNMENT);
+			stats.repaint();
+			stats.setVisible(true);
+			this.add(stats);
 			searchbar.addFocusListener(new FocusListener() {
 				public void focusGained(FocusEvent arg0) {
 					searchbar.setText("");
@@ -72,8 +77,10 @@ public class MainWindow extends JFrame{
 				public void actionPerformed(ActionEvent e) {
 					user.getQuestions().getQuestions().sort(null);
 					System.out.println(user.getQuestions().getQuestions());
+					ReviewWindow reviewWindow = new ReviewWindow(user.getQuestions().getQuestions(),stats);
 				}
 			});
+			this.revalidate();
 		}
 
 		
@@ -122,22 +129,48 @@ public class MainWindow extends JFrame{
 	
 	public MainWindow(User u) {
 		super();
+		JFrame thisFrame = this;
 		user = u;
-		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		this.setLocationRelativeTo(null);
 		this.addWindowListener(new WindowAdapter() {
 		    public void windowClosing(WindowEvent e) {
-		        // call terminate
+		        int response = JOptionPane.showConfirmDialog(thisFrame, "Do you wanna save the changes?");
+		        if(response == JOptionPane.YES_OPTION) {
+		        	if(user.saveData()) {
+						JOptionPane.showMessageDialog(thisFrame, "Saved Successfully!");
+			        	System.exit(0);
+		        	}
+					else
+						JOptionPane.showMessageDialog(thisFrame, "Uh Oh, something went wrong...");
+		        }
+		        else if(response == JOptionPane.NO_OPTION)
+		        	System.exit(0);
 		    }
 		});
-		this.setVisible(true);
 		this.setSize(800, 600);
 		this.setResizable(true);
 		this.setTitle("QBank");
 		this.setLayout(new BorderLayout());
+		this.setMinimumSize(new Dimension(200,200));
 		this.getContentPane().add(new MainPanel(user),BorderLayout.CENTER);
 		this.getContentPane().add(new LeftSidePanel(),BorderLayout.WEST);
 		this.getContentPane().add(new RightSidePanel(),BorderLayout.EAST);
+		this.setVisible(true);
 		this.revalidate();
 	}
 	
+	public static void main(String args[]) {
+		StartUp go = new StartUp();
+		new Thread(()->{
+			System.out.print("Logging in");
+			while(!go.isLoggedIn()) {
+				System.out.print(".");
+			}
+			go.setVisible(false);
+			MainWindow window = new MainWindow(go.getUser());
+		}).start();
+	}
+
 }
+
