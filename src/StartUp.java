@@ -5,24 +5,31 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 
-import javax.security.auth.callback.ConfirmationCallback;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 public class StartUp extends JFrame{
+	boolean loggedIn = false;
+	public String name;
+	public String pwd;
+	User usr;
 	StartUp(){
 		super();
 		JFrame thisWindow = this;
 		this.setTitle("Startup");
-		this.setBounds(0,0,800,400);
-		this.setLayout(new BoxLayout(this.getContentPane(), BoxLayout.X_AXIS));
+		this.setBounds(0,0,300,175);
+		this.setLocationRelativeTo(null);
+		this.setLayout(new BoxLayout(this.getContentPane(), BoxLayout.Y_AXIS));
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setVisible(true);
 		JButton newUser = new JButton("New User");
 		JButton existingAccount = new JButton("Existing Account");
+		newUser.setAlignmentX(CENTER_ALIGNMENT);
+		existingAccount.setAlignmentX(CENTER_ALIGNMENT);
 		this.add(newUser);
 		this.add(existingAccount);
 		this.revalidate();
@@ -31,31 +38,48 @@ public class StartUp extends JFrame{
 			public void actionPerformed(ActionEvent arg0) {
 				newUser.setVisible(false);
 				existingAccount.setVisible(false);
-				thisWindow.setLayout(new BoxLayout(thisWindow.getContentPane(), BoxLayout.Y_AXIS));
+				JButton back = new JButton("back");
+				JPanel thisPanel = new JPanel();
+				thisPanel.setLayout(new BoxLayout(thisPanel, BoxLayout.Y_AXIS));
 				JTextField username = new JTextField("username");
-				thisWindow.add(username);
+				thisPanel.add(username);
 				JTextField password = new JTextField("password");
-				thisWindow.add(password);
+				thisPanel.add(password);
 				JButton confirm = new JButton("confirm");
 				confirm.setAlignmentX(CENTER_ALIGNMENT);
-				thisWindow.add(confirm);
+				back.setAlignmentX(CENTER_ALIGNMENT);
+				thisPanel.add(confirm);
+				thisPanel.add(back);
+				thisWindow.add(thisPanel);
+				back.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						newUser.setVisible(true);
+						existingAccount.setVisible(true);
+						thisPanel.setVisible(false);
+					}});
 				confirm.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
-						File userData = new File(System.getProperty("user.dir" + "/" + username));
+						File userData = new File(System.getProperty("user.dir") + "/" + username.getText());
 						if(userData.exists()) {
 							try {
 					            FileInputStream fileIn = new FileInputStream(userData);
 					            ObjectInputStream objectIn = new ObjectInputStream(fileIn);
 					            Object obj = objectIn.readObject();
 					            objectIn.close();
-					            MainWindow w = new MainWindow((User)obj);
+					            usr = (User)obj;
+					            if(usr.getPassword().equals(password.getText())) {
+					            	loggedIn = true;
+					            }
+					            else
+					            	JOptionPane.showMessageDialog(thisPanel,"Wrong password, please try again.\nhint: " + usr.getPassword().charAt(0) + "***" + usr.getPassword().charAt(usr.getPassword().length()-1));
+					            	
 					        } catch (Exception ex) {
 					            ex.printStackTrace();
-					            JOptionPane.showMessageDialog(thisWindow, "Oops, something went wrong...");
+					            JOptionPane.showMessageDialog(thisPanel, "Oops, something went wrong...");
 					        }
 						}
 						else {
-							JOptionPane.showConfirmDialog(thisWindow, "User not found");
+							JOptionPane.showMessageDialog(thisPanel, "User not found");
 						}
 					}
 				});
@@ -66,34 +90,46 @@ public class StartUp extends JFrame{
 			public void actionPerformed(ActionEvent arg0) {
 				newUser.setVisible(false);
 				existingAccount.setVisible(false);
-				thisWindow.setLayout(new BoxLayout(thisWindow.getContentPane(), BoxLayout.Y_AXIS));
+				JPanel thisPanel = new JPanel();
+				thisPanel.setLayout(new BoxLayout(thisPanel, BoxLayout.Y_AXIS));
 				JTextField username = new JTextField("username");
-				thisWindow.add(username);
+				thisPanel.add(username);
 				JTextField password = new JTextField("password");
-				thisWindow.add(password);
+				thisPanel.add(password);
 				JTextField reenter = new JTextField("re-enter password");
-				thisWindow.add(reenter);
+				thisPanel.add(reenter);
 				JButton confirm = new JButton("confirm");
 				confirm.setAlignmentX(CENTER_ALIGNMENT);
-				thisWindow.add(confirm);
+				thisPanel.add(confirm);
+				JButton back = new JButton("back");
+				back.setAlignmentX(CENTER_ALIGNMENT);
+				thisPanel.add(back);
+				thisWindow.add(thisPanel);
+				back.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						newUser.setVisible(true);
+						existingAccount.setVisible(true);
+						thisPanel.setVisible(false);
+					}});
 				confirm.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						if(!password.getText().equals(reenter.getText())) {
 							System.out.println(password.getText()+"\n"+reenter.getText());
-							reenter.setText("Password not match, please retry");
+							JOptionPane.showMessageDialog(thisWindow, "Password not match, please retry");
 						}
 						else {
-							String name = username.getText();
-							String pwd = password.getText();
-							MainWindow w = new MainWindow(new User(name,pwd));
+							usr = new User(name, pwd);
+							loggedIn = true;
 						}
 					}
 				});
 			}
 		});
 	}
-	
-	public static void main(String args[]) {
-		StartUp w = new StartUp();
+	public boolean isLoggedIn() {
+		return loggedIn;
+	}
+	public User getUser() {
+		return usr;
 	}
 }

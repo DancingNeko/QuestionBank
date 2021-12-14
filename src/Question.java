@@ -36,6 +36,14 @@ public class Question implements Comparable,Serializable{
 		familiarity = f;
 	}
 	
+	public void setQuestion(Object q) {
+		content = q;
+	}
+	
+	public void setAnswer(Object a) {
+		answer = a;
+	}
+	
 	public static void answerCorrect(Question q, boolean correct) {
 		if(correct)
 			q.setFamiliarity((int)(q.getFamiliarity() * 1.1));
@@ -52,6 +60,13 @@ public class Question implements Comparable,Serializable{
 		else {
 			return -1;
 		}
+	}
+	
+	public Object getQuestion() {
+		return content;
+	}
+	public Object getAnswer() {
+		return answer;
 	}
 	
 	public String toString() {
