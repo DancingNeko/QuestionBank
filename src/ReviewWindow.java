@@ -22,8 +22,10 @@ public class ReviewWindow extends JFrame{
 		super();
 		thisWindow = this;
 		question = new JLabel();
+		question.setAlignmentX(LEFT_ALIGNMENT);
 		answer = new JTextArea();
 		confirm = new JButton("confirm");
+		confirm.setAlignmentX(CENTER_ALIGNMENT);
 		this.setSize(getPreferredSize());
 		this.setLayout(new BoxLayout(thisWindow.getContentPane(),BoxLayout.Y_AXIS));
 		questions.sort(null);

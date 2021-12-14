@@ -10,6 +10,10 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.TreeMap;
+
 import javax.swing.JOptionPane;
 import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
@@ -68,6 +72,8 @@ public class MainWindow extends JFrame{
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 					System.out.println(searchbar.getText());
+					ArrayList<Question> searchResults = searchQuestion(searchbar.getText(), user.getQuestions().getQuestions());
+					SearchResultWindow srw = new SearchResultWindow(searchResults);
 					searchbar.setText("");
 				}
 				
@@ -170,6 +176,46 @@ public class MainWindow extends JFrame{
 			go.setVisible(false);
 			MainWindow window = new MainWindow(go.getUser());
 		}).start();
+	}
+	
+	
+	public static ArrayList<Question> searchQuestion(String searchWords, ArrayList<Question> qSet) {
+		String[] keywords = searchWords.split(" ");
+		ArrayList<Question> searchResults = new ArrayList<Question>();
+		if(keywords.length <= 2) {
+			for(Question q:qSet) {
+				int matches = 0;
+				String question = (String)(q.getQuestion());
+				for(String keyword:keywords) {
+					if(question.contains(keyword))
+						matches++;
+				}
+				if(matches == 2)
+					searchResults.add(0, q); // add to first for best match
+				else if(matches == 1)
+					searchResults.add(q); //add to last for least match
+			}
+			return searchResults;
+		}
+		else {
+			TreeMap<Double, Question> questionMatch = new TreeMap<Double, Question>(); //the double type key is the match% between keywords and question
+			for(Question q:qSet) {
+				String question = (String)(q.getQuestion());
+				int distance = LevenshteinDistance.compute_Levenshtein_distanceDP(searchWords, question);
+				double matchPercentage = (double)distance/question.length();
+				if(matchPercentage > 0.7)//over 70% that's different
+					continue;
+				if(!questionMatch.containsKey(matchPercentage))
+					questionMatch.put(matchPercentage, q);
+				else
+					questionMatch.put(matchPercentage+0.0123, q);// avoid conflict of keys
+			}
+			Set<Double> keys = questionMatch.keySet();
+			for(Double key:keys) {
+				searchResults.add(questionMatch.get(key));//put question by match percentage into arraylist
+			}
+			return searchResults;
+		}
 	}
 
 }
