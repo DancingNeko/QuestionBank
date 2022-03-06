@@ -11,6 +11,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -72,7 +73,7 @@ public class MainWindow extends JFrame{
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 					System.out.println(searchbar.getText());
-					ArrayList<Question> searchResults = searchQuestion(searchbar.getText(), user.getQuestions().getQuestions());
+					ArrayList<Question> searchResults = searchQuestion(searchbar.getText(), user);
 					SearchResultWindow srw = new SearchResultWindow(searchResults);
 					searchbar.setText("");
 				}
@@ -90,9 +91,17 @@ public class MainWindow extends JFrame{
 		}
 
 		
-		public static void addQuestion(Object question, Object answer) {
+		public static Question addQuestion(Object question, Object answer) {
 			Question q = new Question(question, answer);
 			user.getQuestions().addQuestion(q);
+			return q;
+		}
+		
+		public static void updateTag(String tagName, Question question, boolean bind) {
+			if(bind)
+				user.bindTag(tagName, question);
+			else
+				user.removeTag(tagName, question);
 		}
 	}
 	
@@ -179,15 +188,21 @@ public class MainWindow extends JFrame{
 	}
 	
 	
-	public static ArrayList<Question> searchQuestion(String searchWords, ArrayList<Question> qSet) {
+	public static ArrayList<Question> searchQuestion(String searchWords, User user) {
+		ArrayList<Question> qSet = user.getQuestions().getQuestions();
+		HashMap<String,Tag> tags = user.getTags();
 		String[] keywords = searchWords.split(" ");
 		ArrayList<Question> searchResults = new ArrayList<Question>();
+		for(String key:tags.keySet()) {
+			if(key.contains(searchWords.toLowerCase()))
+				searchResults.addAll(tags.get(key).getQuestions());
+		}
 		if(keywords.length <= 2) {
 			for(Question q:qSet) {
 				int matches = 0;
 				String question = (String)(q.getQuestion());
 				for(String keyword:keywords) {
-					if(question.contains(keyword))
+					if(question.toLowerCase().contains(keyword.toLowerCase()))
 						matches++;
 				}
 				if(matches == 2)
@@ -201,7 +216,8 @@ public class MainWindow extends JFrame{
 			TreeMap<Double, Question> questionMatch = new TreeMap<Double, Question>(); //the double type key is the match% between keywords and question
 			for(Question q:qSet) {
 				String question = (String)(q.getQuestion());
-				int distance = LevenshteinDistance.compute_Levenshtein_distanceDP(searchWords, question);
+				question = question.toLowerCase();
+				int distance = LevenshteinDistance.compute_Levenshtein_distanceDP(searchWords.toLowerCase(), question);
 				double matchPercentage = (double)distance/question.length();
 				if(matchPercentage > 0.7)//over 70% that's different
 					continue;
@@ -212,7 +228,7 @@ public class MainWindow extends JFrame{
 			}
 			Set<Double> keys = questionMatch.keySet();
 			for(Double key:keys) {
-				searchResults.add(questionMatch.get(key));//put question by match percentage into arraylist
+				searchResults.add(questionMatch.get(key));//put question by match percentage into array list
 			}
 			return searchResults;
 		}

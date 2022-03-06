@@ -22,4 +22,13 @@ public class Tag implements Serializable{
 	public void addQuestion(Question item) {
 		questions.add(item);
 	}
+	
+	public void removeQuesiton(Question item) {
+		for(int i = 0; i < questions.size(); i++) {
+			if(questions.get(i).equals(item)) {
+				questions.remove(i);
+				return;
+			}
+		}
+	}
 }

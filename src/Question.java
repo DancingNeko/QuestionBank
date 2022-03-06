@@ -28,6 +28,16 @@ public class Question implements Comparable,Serializable{
 		tags.add(newTag);
 	}
 	
+	public void removeTag(String name) {
+		for(int i = 0; i < tags.size(); i++) {
+			Tag t = tags.get(i);
+			if(t.getName().toLowerCase().equals(name.toLowerCase())) {
+				tags.remove(i);
+				return;
+			}
+		}
+	}
+	
 	public int getFamiliarity() {
 		return familiarity;
 	}

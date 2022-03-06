@@ -71,6 +71,7 @@ public class SearchResultWindow extends JFrame{
 			String answer = (String)q.getAnswer();
 			displayAnswer = new JTextArea(answer);
 			displayAnswer.setBackground(new Color(156, 255, 165));
+			JButton editTags = new JButton("edit tags");
 			JButton showAnswer = new JButton("show answer");
 			JButton back = new JButton("back");
 			JButton saveChanges = new JButton("save changes");
@@ -94,6 +95,7 @@ public class SearchResultWindow extends JFrame{
 					displayAnswer.setSize(getPreferredSize());
 					questionPanel.add(displayAnswer);
 					back.setVisible(true);
+					questionPanel.add(editTags);
 					questionPanel.add(saveChanges);
 					questionPanel.add(back);
 					questionPanel.revalidate();
@@ -107,6 +109,61 @@ public class SearchResultWindow extends JFrame{
 					mainPanel.setVisible(true);
 				}
 			});
+			editTags.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					JFrame tagWindow  = new JFrame("Edit Tags");
+					tagWindow.setLayout(new BoxLayout(tagWindow.getContentPane(),BoxLayout.Y_AXIS));
+					tagWindow.setLocationRelativeTo(null);
+					String tagNames = "";
+					for(Tag t:q.getTags()) {
+						tagNames += "[" + t.getName() + "]\n";
+					}
+					JTextArea jta = new JTextArea(tagNames);
+					tagWindow.add(jta);
+					JButton confirm = new JButton("save changes");
+					tagWindow.add(confirm);
+					tagWindow.setSize(getPreferredSize());
+					confirm.addActionListener(new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent arg0) {
+							String textInput = jta.getText();
+							//check whether all previous tags are present
+							ArrayList<Tag> tags = q.getTags();
+							for(int i = 0; i < tags.size(); i++) {
+								Tag t = tags.get(i);
+								if(!textInput.toLowerCase().equals(t.getName().toLowerCase())) {
+									MainWindow.MainPanel.updateTag(t.getName(), q, false);//tag removed
+									i--;
+								}
+							}
+							//check whether new tags added
+							while(textInput.contains("[") && textInput.contains("]")) {
+								int front = textInput.indexOf('[');
+								int back = textInput.indexOf(']');
+								String tagName = textInput.substring(front+1,back);
+								if(back != textInput.length()-1)
+									textInput = textInput.substring(back+1);
+								else
+									textInput = "";
+								boolean newTag = true;
+								for(Tag t:q.getTags()) {
+									if(t.getName().toLowerCase().equals(tagName.toLowerCase()))
+										newTag = false;
+								}
+								if(newTag) {
+									MainWindow.MainPanel.updateTag(tagName, q, true);
+								}
+							}
+						JOptionPane.showMessageDialog(null, "Change Saved!");
+						}
+					});
+					tagWindow.setVisible(true);
+				}
+			});
+			displayAnswer.setLineWrap(true);
+			displayProblem.setLineWrap(true);
+			this.add(editTags);
 			this.add(showAnswer);
 			this.add(back);
 		}

@@ -1,4 +1,4 @@
-import java.awt.Dimension;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -74,7 +74,8 @@ public class StartUp extends JFrame{
 					            	JOptionPane.showMessageDialog(thisPanel,"Wrong password, please try again.\nhint: " + usr.getPassword().charAt(0) + "***" + usr.getPassword().charAt(usr.getPassword().length()-1));
 					            	
 					        } catch (Exception ex) {
-					            ex.printStackTrace();
+					            System.out.println();
+					        	ex.printStackTrace();
 					            JOptionPane.showMessageDialog(thisPanel, "Oops, something went wrong...");
 					        }
 						}
@@ -118,6 +119,8 @@ public class StartUp extends JFrame{
 							JOptionPane.showMessageDialog(thisWindow, "Password not match, please retry");
 						}
 						else {
+							name = username.getText();
+							pwd = password.getText();
 							usr = new User(name, pwd);
 							loggedIn = true;
 						}

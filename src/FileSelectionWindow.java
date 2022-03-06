@@ -4,11 +4,12 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 
 public class FileSelectionWindow extends JFrame{
 	Object question = null;
 	Object answer = null;
+	Question q = null;
+	boolean tagSet = false;
 	
 	FileSelectionWindow(){
 		super();
@@ -27,6 +28,7 @@ public class FileSelectionWindow extends JFrame{
 			public void actionPerformed(ActionEvent arg0) {
 				text.setVisible(false);
 				JTextArea jtf = new JTextArea("Input your question here");
+				jtf.setLineWrap(true);
 				add(jtf);
 				JButton confirm = new JButton("confirm");
 				window.add(confirm);
@@ -39,7 +41,20 @@ public class FileSelectionWindow extends JFrame{
 						}
 						else if(answer == null){
 							answer = jtf.getText();
-							MainWindow.MainPanel.addQuestion(question,answer);
+							q = MainWindow.MainPanel.addQuestion(question,answer);
+							jtf.setText("Add a list of tags for your question below:\n[Example Tag]\n[ExampleTag]\nThe Square bracket is required");
+						}
+						else if(!tagSet){
+							String textInput = jtf.getText();
+							while(textInput.contains("[") && textInput.contains("]")){
+								int front = textInput.indexOf('[');
+								int back = textInput.indexOf(']');
+								MainWindow.MainPanel.updateTag(textInput.substring(front+1,back), q, true);
+								if(back == textInput.length()-1)
+									textInput = "";
+								else
+									textInput = textInput.substring(back+1);
+							}
 							jtf.setText("Question created!\nClose window to continue or add another");
 							JButton addAnother = new JButton("Add another");
 							window.add(addAnother);
@@ -58,7 +73,6 @@ public class FileSelectionWindow extends JFrame{
 								}
 							});
 						}
-						else {}
 					}
 				});
 			}

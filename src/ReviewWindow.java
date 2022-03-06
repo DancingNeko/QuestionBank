@@ -1,19 +1,17 @@
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Arrays;
-
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
 
 public class ReviewWindow extends JFrame{
-	JLabel question;
+	JTextArea question;
 	JTextArea answer;
 	JButton confirm;
 	JFrame thisWindow;
@@ -21,9 +19,12 @@ public class ReviewWindow extends JFrame{
 	public ReviewWindow(ArrayList<Question>questions, JPanel stats) {
 		super();
 		thisWindow = this;
-		question = new JLabel();
-		question.setAlignmentX(LEFT_ALIGNMENT);
+		question = new JTextArea();
+		question.setLineWrap(true);
 		answer = new JTextArea();
+		answer.setLineWrap(true);
+		answer.setBackground(new Color(156, 255, 165));
+		question.setAlignmentX(LEFT_ALIGNMENT);
 		confirm = new JButton("confirm");
 		confirm.setAlignmentX(CENTER_ALIGNMENT);
 		this.setSize(getPreferredSize());
@@ -40,17 +41,19 @@ public class ReviewWindow extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				String actualAnswer = (String)(questions.get(count).getAnswer());
-				if(compareStrings(actualAnswer,answer.getText()) < 0.1*actualAnswer.length()) { //90% accurate
+				actualAnswer = actualAnswer.toLowerCase();
+				String inputAnswer = answer.getText().toLowerCase();
+				if(compareStrings(actualAnswer,inputAnswer) < 0.1*actualAnswer.length()) { //90% accurate
 					JOptionPane.showMessageDialog(thisWindow, "Correct!");
 					answer.setText("");
 					questions.get(count).answerCorrect(questions.get(count), true);
 				}
-				else if(compareStrings(actualAnswer,answer.getText()) <= 0.3*actualAnswer.length()) {
+				else if(compareStrings(actualAnswer,inputAnswer) <= 0.3*actualAnswer.length()) {
 					JOptionPane.showMessageDialog(thisWindow, "Seems a bit off?\nCorrect Answer is: " + actualAnswer);
 					answer.setText("");
 					questions.get(count).answerCorrect(questions.get(count), true);
 				}
-				else if(compareStrings(actualAnswer,answer.getText()) <= 0.5*actualAnswer.length()) {
+				else if(compareStrings(actualAnswer,inputAnswer) <= 0.5*actualAnswer.length()) {
 					JOptionPane.showMessageDialog(thisWindow, "It's close, but nah-ah...\nCorrect Answer is: " + actualAnswer);
 					answer.setText("");
 				}
